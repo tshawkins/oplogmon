@@ -59,22 +59,22 @@ class parseOplog {
     private function _handleLog(&$logentry) {
         switch ($logentry['op']) {
             case 'n':
-                // do nothingÊno-op
+                // do nothing no-op
                 break;
 
             case 'i':
                 // insert
-                $this->_handleObjectInsert($logentry);
+                $this->handleObjectInsert($logentry);
                 break;
 
             case 'u':
                 // update
-                $this->_handleObjectUpdate($logentry);
+                $this->handleObjectUpdate($logentry);
                 break;
 
             case 'd':
                 // update
-                $this->_handleObjectDelete($logentry);
+                $this->handleObjectDelete($logentry);
                 break;
 
 
@@ -84,17 +84,19 @@ class parseOplog {
         }
     }
 
+    // temporary stubs
 
-    private function _handleObjectInsert(&$logentry) {
+
+    public function handleObjectInsert(&$logentry) {
         System_Daemon::info("INSERT:=>" . print_r($logentry, true));
     }
 
 
-    private function _handleObjectUpdate(&$logentry) {
+    public function handleObjectUpdate(&$logentry) {
         System_Daemon::info("UPDATE:=>" . print_r($logentry, true));
     }
 
-    private function _handleObjectDelete(&$logentry) {
+    public function handleObjectDelete(&$logentry) {
         System_Daemon::info("DELETE:=>" . print_r($logentry, true));
     }
 
