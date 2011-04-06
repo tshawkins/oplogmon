@@ -115,7 +115,7 @@ if (!array_key_exists('i', $params) && !array_key_exists('--init-d', $params)) {
 
 $source = null;
 
-// This program can also be run in the forground with runmode --no-daemon
+// setup the master to track
 if (array_key_exists('s', $params) || array_key_exists('--source', $params)) {
     if(array_key_exists('s', $params)){
         $source = trim($params['s']);
@@ -142,10 +142,6 @@ if (!array_key_exists('n', $params) && !array_key_exists('--no-daemon', $params)
 // This variable gives your own code the ability to breakdown the daemon:
 $runningOkay = true;
 
-// This variable keeps track of how many 'runs' or 'loops' your daemon has
-// done so far. For example purposes, we're quitting on 3.
-$cnt = 1;
-
 // Create an instance of the Runtime interface to mongo
 
 $hMonitor = parseOplog::getInstance($source);
@@ -155,43 +151,19 @@ $hMonitor = parseOplog::getInstance($source);
 // - That your own code has been running Okay
 // - That we're not executing more than 3 runs
 while (!System_Daemon::isDying() && $runningOkay) {
-    // What mode are we in?
-    $mode = '"'.(System_Daemon::isInBackground() ? '' : 'non-' ).
-        'daemon" mode';
 
-    // Log something using the Daemon class's logging facility
-    // Depending on runmode it will either end up:
-    //  - In the /var/log/logparser.log
-    //  - On screen (in case we're not a daemon yet)
-    System_Daemon::info('oplogmon running in %s',
-        $mode
-    );
 
-    // In the actuall logparser program, You could replace 'true'
-    // With e.g. a  parseLog('vsftpd') function, and have it return
-    // either true on success, or false on failure.
     $runningOkay = true;
 
 
     $runningOkay = $hMonitor->pollOplog();
 
 
-    // Should your parseLog('vsftpd') return false, then
-    // the daemon is automatically shut down.
-    // An extra log entry would be nice, we're using level 3,
-    // which is critical.
-    // Level 4 would be fatal and shuts down the daemon immediately,
-    // which in this case is handled by the while condition.
+
     if (!$runningOkay) {
         System_Daemon::err('oplogmon() produced an error, '.
             'so this will be my last run');
     }
-
-    // Relax the system by sleeping for a little bit
-    // iterate also clears statcache
-    //System_Daemon::iterate(1);
-
-    $cnt++;
 }
 
 // Shut down the daemon nicely

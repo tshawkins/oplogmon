@@ -7,25 +7,31 @@ class parseOplog {
     var $_mongodbConnection = null;
     var $lastts = null;
 
+    /**
+     * @param string|null $host
+     * @param array|null $options
+     */
+
     public function __construct($host = null, $options = null) {
         $this->_mongodbConnection = mongodbConnection::getInstance($host, $options);
 
         //$this->lastts = new MongoTimestamp(0);
     }
 
-    // Poll Oplog
+    /**
+     * @return bool
+     */
 
     public function pollOplog() {
 
 
         $mongo = $this->_mongodbConnection->getConnection();
 
+        // Very simple minded - only work for master/slave replication
 
         $oplog = $mongo->selectCollection('local', 'oplog.$main');
 
         if ($oplog) {
-
-            //$query = array("ts" => array('$gt' => $this->lastts));
 
             $results = $oplog->find()->timeout(10000)->tailable(true);
             while (1) {
@@ -42,6 +48,8 @@ class parseOplog {
                     $this->_handleLog($logentry);
                 }
             }
+        } else {
+            return false; // no oplog to track
         }
 
 
@@ -94,6 +102,11 @@ class parseOplog {
 
     public static $instance = null;
     public static $instanceClassName = __CLASS__;
+
+    /**
+     * @static
+     * @return parseOplog
+     */
 
     public static function getInstance() {
         if (self::$instance === null) {
