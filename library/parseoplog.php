@@ -5,7 +5,6 @@ require_once('mongodb.php');
 class parseOplog {
 
     var $_mongodbConnection = null;
-    var $lastts = null;
 
     /**
      * @param string|null $host
@@ -15,7 +14,6 @@ class parseOplog {
     public function __construct($host = null, $options = null) {
         $this->_mongodbConnection = mongodbConnection::getInstance($host, $options);
 
-        //$this->lastts = new MongoTimestamp(0);
     }
 
     /**
@@ -42,8 +40,6 @@ class parseOplog {
                     usleep(100000);
                 } else {
                     $logentry = $results->getNext();
-
-                    // $this->lastts = $logentry['ts'];
 
                     $this->_handleLog($logentry);
                 }
